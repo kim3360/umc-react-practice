@@ -12,9 +12,12 @@ export function StarButton({ value, filled, onClick }: StarButtonProps) {
   return (
     <button
       type="button"
-      className={`w-10 h-10 p-0 text-2xl border-none bg-transparent cursor-pointer transition-all duration-150 hover:scale-110 text-white/25 dark:text-white/25 ${
-        filled ? 'text-amber-400 dark:text-amber-400' : 'text-slate-200 dark:text-slate-200'
-      }`}
+      className="w-10 h-10 p-0 text-2xl border-none bg-transparent cursor-pointer transition-all duration-200 hover:scale-110"
+      style={{
+        color: filled ? '#eab308' : '#94a3b8',
+        opacity: filled ? 1 : 0.4,
+        transition: 'color 0.2s, opacity 0.2s',
+      }}
       onClick={onClick}
       aria-label={`${value}점`}
     >
