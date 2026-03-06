@@ -46,13 +46,58 @@ function StarButton({ filled, onClick }) {
   return <button onClick={onClick}>★</button>;  // 동작: 부모 onClick 실행
 }`;
 
-const STEP4_COMPOUND_STARTER = `// ③ Compound Component (동작 주석 포함)
-<Accordion.Root defaultValue={null}>  // 동작: openId를 Context로 공유
+const STEP4_COMPOUND_STARTER = `// ③ Compound Component — Accordion 전체 구현
+import { createContext, useContext, useState } from 'react';
+
+// 1. Context: 열린 패널 ID와 toggle 함수 공유
+const AccordionContext = createContext(null);
+
+function useAccordionContext() {
+  const ctx = useContext(AccordionContext);
+  if (!ctx) throw new Error('Accordion.Root 안에서 사용하세요');
+  return ctx;
+}
+
+// 2. Root: Provider로 상태 범위 지정
+function Root({ defaultValue = null, children }) {
+  const [openId, setOpenId] = useState(defaultValue);
+  const toggle = (id) => setOpenId(prev => prev === id ? null : id);
+  return (
+    <AccordionContext.Provider value={{ openId, toggle }}>
+      {children}
+    </AccordionContext.Provider>
+  );
+}
+
+// 3. Item: 각 아코디언 항목 감싸기
+function Item({ value, children }) {
+  return <div data-value={value}>{children}</div>;
+}
+
+// 4. Trigger: 클릭 시 toggle 호출
+function Trigger({ value, children }) {
+  const { openId, toggle } = useAccordionContext();
+  return (
+    <button onClick={() => toggle(value)}>
+      {children} {openId === value ? '−' : '+'}
+    </button>
+  );
+}
+
+// 5. Panel: openId === value일 때만 렌더
+function Panel({ value, children }) {
+  const { openId } = useAccordionContext();
+  if (openId !== value) return null;
+  return <div>{children}</div>;
+}
+
+// 사용 예시
+const Accordion = { Root, Item, Trigger, Panel };
+
+<Accordion.Root defaultValue={null}>
   <Accordion.Item value="a">
-    <Accordion.Trigger value="a">  // 동작: 클릭 시 toggle → openId 변경
-      클릭하면 펼쳐져요
-    </Accordion.Trigger>
-    <Accordion.Panel value="a">  // 동작: openId === value일 때만 표시
+    <Accordion.Trigger value="a">클릭하면 펼쳐져요</Accordion.Trigger>
+    <Accordion.Panel value="a">
       <p>여러 컴포넌트가 함께 동작해요.</p>
     </Accordion.Panel>
   </Accordion.Item>
